@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>LogisticRegression</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
+		<style>
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: black;
+				shape-rendering: crispEdges;
+			}
+			.axis text {
+				font-family: sans-serif;
+				font-size: 11px;
+			}
+			.block1 { 
+			    width: 580px;
+			    height: 580px; 
+			    background: none;
+			    padding: 5px;
+			    padding-right: 20px;
+			    border: solid 1px black; 
+			    float: left;
+			}
+		</style>
+	</head>
+	<body>
+		coeff1:<input type = "number" size = "20" id = "coeff1" value = "1" onchange = "redrawC1(this.value);">
+		coeff2:<input type = "number" size = "20" id = "coeff2" value = "2" onchange = "redrawC2(this.value);">
+		bias:<input type = "number" size = "20" id = "bias" value = "3" onchange = "redrawB(this.value);">
+		<script>
+			function logRegression(coeff1, coeff2, bias) {
+				this.bias = bias;
+				this.coeff = [coeff1, coeff2];
+				
+				this.decisionFunction = function(coordinates) {
+					return coordinates[0] * this.coeff[0] + coordinates[1] * this.coeff[1] + this.bias;
+				};
+				
+				this.probability = function(dataset) {
+					var decision = this.decisionFunction(dataset);
+					return 1 / (1 + Math.exp(-decision));
+				};
+				
+				this.loglossPenatlies = function(dataset) {
+					probabilities = this.probability(dataset);
+					return [-Math.log(1 - probabilities), -Math.log(probabilities)];
+				};
+				
+				this.decisionLine = function() {
+					var cx = this.coeff[0], cy = this.coeff[1];
+					var x_1, y_1, x_2, y_2;
+					if (Math.abs(this.coeff[0]) > Math.abs(this.coeff[1])) {
+						y_1 = -4, y_2 = 4;
+						x_1 = - (cy * y_1 + this.bias) / cx;
+						x_2 = - (cy * y_2 + this.bias) / cx;
+					}
+					else {
+						x_1 = -4, x_2 = 4;
+						y_1 = - (cx * x_1 + this.bias) / cy;
+						y_2 = - (cx * x_2 + this.bias) / cy;
+					}
+					return [[x_1, x_2], [y_1, y_2]];
+				};
+				
+				this.normalVector = function() {
+					var c_1 = this.coeff[0], c_2 = this.coeff[1];
+					var p = -this.bias / (Math.pow(c_1, 2) + Math.pow(c_2, 2));
+					var x_1 = c_1 * p, y_1 = c_2 * p;
+					var x_2 = x_1 + c_1, y_2 = y_1 + c_2;
+					return [[x_1, x_2], [y_1, y_2]];
+				};
+			};
+			var nSamples = 20;
+			var dataset = new Array(nSamples);
+			var labels = [nSamples];
+			for (var i = 0; i < nSamples; i++) {
+				dataset[i] = [];
+				dataset[i][0] = Math.random() * 2 - 1;
+				dataset[i][1] = Math.random() * 2 - 1;
+				labels[i] = Math.floor(Math.random() * 2);
+				dataset[i][0] += 2 * labels[i] - 1;
+				dataset[i][1] += 2 * labels[i] - 1;
+			};
+			var coeff1 = 1, coeff2 = 2, bias = 3;
+			var lr = new logRegression(coeff1, coeff2, bias);
+			var minValue = -4, maxValue = 4;
+			var w = parseFloat(550), h = parseFloat(550), padding = parseFloat(30);
+			var div = d3.select("body").append("div").attr("class", "block1");
+			var svg = div.append("svg")
+				.attr("width", w + padding)
+   	 			.attr("height", h + padding);
+			var xScale = d3.scale.linear()
+	    		.domain([minValue, maxValue])
+	    		.range([0, w]);
+	    	var yScale = d3.scale.linear()
+	    		.domain([minValue, maxValue])
+	    		.range([h, 0]);
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.ticks(5);
+			var yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + padding + "," + h + ")")
+				.call(xAxis);
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + padding + ",0)")
+				.call(yAxis);
+			var colorScale = d3.scale.linear()
+			.domain([-1, 1])
+			.interpolate(d3.interpolateHcl)
+			.range(["#007AFF", "#FFF500"]);
+		var numStrokes = 50;
+		var delta = (maxValue - minValue) / numStrokes; // grid
+		var horStrokes = [], vertStrokes = [];
+		for (var i = minValue; i < maxValue; i += delta) {
+			horStrokes[i - minValue] = [];
+			vertStrokes[i - minValue] = [];
+			for (var j = minValue; j < maxValue; j += delta) {
+				horStrokes[i - minValue][j - minValue] = svg.append("line") //horizontal lines
+					.attr("x1", xScale(i) + padding)
+					.attr("x2", xScale(i + delta) + padding)
+					.attr("y1", yScale(j))
+					.attr("y2", yScale(j))
+					.attr("stroke", colorScale(lr.probability([i + delta / 2, j])))
+					.attr("stroke-width", 1);
+				vertStrokes[i - minValue][j - minValue] = svg.append("line") //vertical lines
+					.attr("x1", xScale(i) + padding)
+					.attr("x2", xScale(i) + padding)
+					.attr("y1", yScale(j))
+					.attr("y2", yScale(j + delta))
+					.attr("stroke", colorScale(lr.probability([i, j + delta / 2])))
+					.attr("stroke-width", 1);
+			}
+		}
+			svg.selectAll("circle").data(dataset).enter().append("circle")
+				.attr("cx", function(d) {
+       				return xScale(d[0]) + padding;
+   				})
+   				.attr("cy", function(d) {
+        			return yScale(d[1]);
+   				})
+   				.attr("fill", function(d, i) {
+   					if (labels[i]) return "red";
+   					return "blue";
+   				})
+   				.attr("r", 3);
+			var l = lr.decisionLine();
+			var x1, x2, y1, y2;
+			var decLine = svg.append("line")  //decLine
+				.attr("x1", xScale(l[0][0]) + padding)
+				.attr("x2", xScale(l[0][1]) + padding)
+				.attr("y1", yScale(l[1][0]))
+				.attr("y2", yScale(l[1][1]))
+				.attr("stroke", "gray")
+				.attr("stroke-width", 1);
+			function redraw() {
+				lr.coeff = [coeff1, coeff2];
+				lr.bias = parseFloat(bias);
+				for (var i = minValue; i < maxValue; i += delta) {
+					for (var j = minValue; j < maxValue; j += delta) {
+						horStrokes[i - minValue][j - minValue]
+							.attr("stroke", colorScale(lr.probability([i + delta / 2, j])));
+						vertStrokes[i - minValue][j - minValue]
+							.attr("stroke", colorScale(lr.probability([i, j + delta / 2])));
+					}
+				}
+				l = lr.decisionLine();
+				decLine  //redraw decLine
+					.attr("x1", xScale(l[0][0]) + padding)
+					.attr("x2", xScale(l[0][1]) + padding)
+					.attr("y1", yScale(l[1][0]))
+					.attr("y2", yScale(l[1][1]));
+			};
+			function redrawC1(a) {
+				coeff1 = a;
+				redraw();
+			};
+			function redrawC2(a) {
+				coeff2 = a;
+				redraw();
+			};
+			function redrawB(a) {
+				bias = a;
+				redraw();
+			};
+		</script>
+	</body>
+</html>
