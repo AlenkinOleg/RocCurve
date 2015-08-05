@@ -1,0 +1,58 @@
+<!DOCTYPE html >
+<html >
+  <head>
+	<title>LogRegression</title>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+    <script type="text/javascript" src="http://x3dom.org/x3dom/dist/x3dom-full.js"></script>
+    <script type="text/javascript" src="plot3d.js"></script>
+	<script type="text/javascript" src="plot2d.js"></script>
+	<script type="text/javascript" src="logRegr.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://www.x3dom.org/download/dev/x3dom.css"/>
+	<style>
+		.axis path,
+		.axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+		.axis text {
+			font-family: sans-serif;
+			font-size: 11px;
+		}
+		.block1 { 
+		    width: 480px;
+		    height: 480px; 
+		    background: none;
+		    padding: 5px;
+		    padding-right: 20px;
+		    border: solid 1px black; 
+		    float: left;
+		}
+		</style>
+  </head>
+  <body>
+	<div id = "divPlot2"></div>
+	<div id = "divPlot1"></div>
+	<script>
+		var w = parseFloat(450), h = parseFloat(450), padding = parseFloat(30);
+		var div1 = d3.select("#divPlot1").attr("class", "block1");
+		var div2 = d3.select("#divPlot2").attr("class", "block1");
+		var nSamples = 20;
+		var dataset = new Array(nSamples);
+		var labels = [nSamples];
+		for (var i = 0; i < nSamples; i++) {
+			dataset[i] = [];
+			dataset[i][0] = Math.random() * 2 - 1;
+			dataset[i][1] = Math.random() * 2 - 1;
+			labels[i] = Math.floor(Math.random() * 2);
+			dataset[i][0] += 2 * labels[i] - 1;
+			dataset[i][1] += 2 * labels[i] - 1;
+		}
+		var minValue = -4, maxValue = 4;
+		var coeff1 = 1, coeff2 = 1, bias = 1;
+		var lr = new logRegression(coeff1, coeff2, bias);
+		scatterPlot3d(div2);
+		plot2d(div1);
+	</script>
+  </body>
+</html>
