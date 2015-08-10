@@ -27,7 +27,7 @@ function plot2d(div) {
 	var colorScale = d3.scale.linear()
 		.domain([-1, 1])
 		.interpolate(d3.interpolateHcl)
-		.range(["#007AFF", "#FFF500"]);
+		.range(["steelblue", "red"]);
 	var numStrokes = 50;
 	var delta = (maxValue - minValue) / numStrokes; // grid
 	for (var i = minValue; i < maxValue; i += delta) {
@@ -72,27 +72,6 @@ function plot2d(div) {
 	var yReturnScale = d3.scale.linear()
 	    .domain([h, 0])
 	    .range([minValue, maxValue]);
-	/*var drag = d3.behavior.drag()
-	    .on("drag", function(d) {
-			var newDirection = {x: xReturnScale(d3.event.x - padding) - nV.x1, y: yReturnScale(d3.event.y) - nV.y1};
-			nV.x2 = nV.x1 + newDirection.x;
-			nV.y2 = nV.y1 + newDirection.y;
-			nvLine
-				.attr("x2", xScale(nV.x2) + padding)
-				.attr("y2", yScale(nV.y2));
-			lr.coeff = [nV.x2 - nV.x1, nV.y2 - nV.y1];
-			lr.bias = returnBias(nV.x1, nV.y1, lr.coeff[0], lr.coeff[1]);
-			grid
-				.attr("stroke", function() {
-					return colorScale(lr.probability([xReturnScale(this.getAttribute("x1") - padding), yReturnScale(this.getAttribute("y1"))]));
-				});
-			l = lr.decisionLine();
-			decLine
-				.attr("x1", xScale(l.x1) + padding)
-				.attr("x2", xScale(l.x2) + padding)
-				.attr("y1", yScale(l.y1))
-				.attr("y2", yScale(l.y2));
-			});*/
 	var nvLine = svg.append("line")  //normalVector
 		.attr("x1", xScale(nV.x1) + padding)
 		.attr("x2", xScale(nV.x2) + padding)
@@ -114,28 +93,33 @@ function plot2d(div) {
 		var newDirection = {x: xReturnScale(d3.event.x - padding) - nV.x1, y: yReturnScale(d3.event.y) - nV.y1};
 		nV.x2 = nV.x1 + newDirection.x;
 		nV.y2 = nV.y1 + newDirection.y;
-		nvLine
-			.attr("x2", xScale(nV.x2) + padding)
-			.attr("y2", yScale(nV.y2))
-			.attr("x1", xScale(nV.x1) + padding)
-			.attr("y1", yScale(nV.y1));
-		lr.coeff = [nV.x2 - nV.x1, nV.y2 - nV.y1];
-		lr.bias = returnBias(nV.x1, nV.y1, lr.coeff[0], lr.coeff[1]);
-		grid
-			.attr("stroke", function() {
-				return colorScale(lr.probability([xReturnScale(this.getAttribute("x1") - padding), yReturnScale(this.getAttribute("y1"))]));
+		if (newDirection.x == 0 && newDirection.y == 0) {
+			return;
+		}
+		else {
+			nvLine
+				.attr("x2", xScale(nV.x2) + padding)
+				.attr("y2", yScale(nV.y2))
+				.attr("x1", xScale(nV.x1) + padding)
+				.attr("y1", yScale(nV.y1));
+			lr.coeff = [nV.x2 - nV.x1, nV.y2 - nV.y1];
+			lr.bias = returnBias(nV.x1, nV.y1, lr.coeff[0], lr.coeff[1]);
+			grid
+				.attr("stroke", function() {
+					return colorScale(lr.probability([xReturnScale(this.getAttribute("x1") - padding), yReturnScale(this.getAttribute("y1"))]));
+				});
+			l = lr.decisionLine();
+			decLine
+				.attr("x1", xScale(l.x1) + padding)
+				.attr("x2", xScale(l.x2) + padding)
+				.attr("y1", yScale(l.y1))
+				.attr("y2", yScale(l.y2));
+			data3D.transition().ease(ease).duration(0)
+			.attr("translation", function(d, i) {
+				if (labels[i]) return xSc3D(d[0]) + " " + ySc3D(lr.loglossPenalties(d)[0]) + " " + zSc3D(d[1]);
+				return xSc3D(d[0]) + " " + ySc3D(lr.loglossPenalties(d)[1]) + " " + zSc3D(d[1]);
 			});
-		l = lr.decisionLine();
-		decLine
-			.attr("x1", xScale(l.x1) + padding)
-			.attr("x2", xScale(l.x2) + padding)
-			.attr("y1", yScale(l.y1))
-			.attr("y2", yScale(l.y2));
-		data3D.transition().ease(ease).duration(0)
-        .attr("translation", function(d, i) {
-			if (labels[i]) return xSc3D(d[0]) + " " + ySc3D(lr.loglossPenalties(d)[0]) + " " + zSc3D(d[1]);
-			return xSc3D(d[0]) + " " + ySc3D(lr.loglossPenalties(d)[1]) + " " + zSc3D(d[1]);
-		});
+		}
 	}
 	svg.call(svgDrag);
 }

@@ -9,15 +9,17 @@ function scatterPlot3d(parent)
 		  .style( "width", parseInt(parent.style("width"))+"px" )
 		  .style( "height", parseInt(parent.style("height"))+"px" )
 		  .style( "border", "none" )
+	  x3d.append("param")
+		.attr("name", "disableRotation")
+		.attr("value", "true")
 		  
 	  var scene = x3d.append("scene")
-
 	  scene.append("orthoviewpoint")
 		 .attr( "centerOfRotation", [5, 5, 5])
 		 .attr( "fieldOfView", [-5, -5, 15, 15])
 		 .attr( "orientation", [-0.5, 1, 0.2, 1.12*Math.PI/4])
 		 .attr( "position", [8, 4, 15])
-
+	  parent.onmousemove = function() {console.log("hi")}
 	  var axisRange = [0, 8];
 	  var scales = [];
 	  var initialDuration = 0;

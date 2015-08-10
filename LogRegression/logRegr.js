@@ -20,12 +20,12 @@ function logRegression(coeff1, coeff2, bias) {
 		var cx = this.coeff[0], cy = this.coeff[1];
 		var x_1, y_1, x_2, y_2;
 		if (Math.abs(this.coeff[0]) > Math.abs(this.coeff[1])) {
-			y_1 = -4, y_2 = 4;
+			y_1 = -10, y_2 = 10;
 			x_1 = - (cy * y_1 + this.bias) / cx;
 			x_2 = - (cy * y_2 + this.bias) / cx;
 		}
 		else {
-			x_1 = -4, x_2 = 4;
+			x_1 = -10, x_2 = 10;
 			y_1 = - (cx * x_1 + this.bias) / cy;
 			y_2 = - (cx * x_2 + this.bias) / cy;
 		}
