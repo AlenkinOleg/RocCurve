@@ -130,7 +130,7 @@ function plot2d(div) {
 					return yScale(l.y2) + d * ort.y;
 				})
 				.attr("stroke", function(d) {
-					return colorScale(lr.probability([xReturnScale(xScale(l.x1) + d * ort.x), yReturnScale(yScale(l.y1) + d * ort.y)]))
+					return colorScale(lr.probability([xReturnScale(xScale(nV.x1) + d * ort.x), yReturnScale(yScale(nV.y1) + d * ort.y)]))
 				});
 			console.log(lr.coeff, lr.bias);
 			nvLine
