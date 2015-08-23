@@ -6,6 +6,19 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
 		<script src="jquery-2.1.4.js" charset="utf-8"></script>
         <style type="text/css">
+            body{
+                font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+            }
+            .layout-wrapper{
+                max-width: 850px;
+                margin: auto;
+
+            }
+
+            input{
+                width: 60px;
+                margin-right: 20px;
+            }
 			
 			.axis path,
 			.axis line {
@@ -26,20 +39,19 @@
 			
 			.block1 {
 			    background: none;
-                padding: 5px 20px 5px 5px;
-                /*border: solid 1px black;*/
-			    float: left;
-			}
+                padding: 5px;
+                display: inline-block;
+            }
 			
 			.block2 {
 				background: none;
-                padding: 5px 20px 5px 5px;
-                /*border: solid 1px black;*/
-			    float: left;
+                padding: 5px;
+                display: inline-block;
 			}
 
 			.controls{
 				padding: 10px;
+                background-color: #cdf;
 			}
 
             .thresholdLine{
@@ -58,21 +70,46 @@
 		</style>
     </head>
     <body>
-        <h2>
-            ROC curve demo
-        </h2>
-		<div class="controls">
-            <label for="mean1">mean #1:</label><input id="mean1" type = "number" size = "20" value = "0" onchange="draw()">
-            <label for="mean2">mean #2:</label><input id="mean2" type = "number" size = "20" value = "2" onchange="draw()">
-			<label for="var1">variance #1:</label><input id="var1" type = "number" size = "20" value = "4" onchange="draw()">
-			<label for="var2">variance #2:</label><input id="var2" type = "number" size = "20" value = "4" onchange="draw()">
-		</div>
-		<div id="renderer">
+        <div class="layout-wrapper">
+            <h2 style="padding-left: 20px;">
+                ROC curve demo
+            </h2>
+            <div class="controls">
+                <label for="mean1">mean #1:</label><input id="mean1" type = "number" size = "5" value = "0" onchange="draw()">
+                <label for="mean2">mean #2:</label><input id="mean2" type = "number" size = "5" value = "2" onchange="draw()">
+                <label for="var1">variance #1:</label><input id="var1" type = "number" size = "5" value = "4" onchange="draw()">
+                <label for="var2">variance #2:</label><input id="var2" type = "number" size = "5" value = "4" onchange="draw()">
+            </div>
+            <div id="renderer">
+                <!-- here all the plots will be rendered -->
+            </div>
+            <div style="padding: 20px;">
+                <h3>Instructions</h3>
+                <p>
+                    On the right plot: two compared distributions (for demonstration normal distributions were taken).
+                </p>
+                <p>
+                    On the left plot: corresponding
+                    <a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic">ROC curve.</a>
+                </p>
+                <p>
+                    Controls:
+                </p>
+                <ul>
+                    <li>4 inputs with means and variances of distributions</li>
+                    <li>Also vertical line corresponding to threshold can be moved</li>
+                </ul>
+                <p>
+                    Presentation was prepared by Oleg Anichkin and Alex Rogozhnikov.
+                </p>
 
-		</div>
+
+            </div>
+        </div>
+
         <script type = "text/javascript">
 			// defining global constants
-	        var w = 350., h = 350., padding = 30.;
+	        var w = 345., h = 350., padding = 30.;
 	        var mean1 = 1., mean2 = 0., var1 = 2., var2 = 2.;
 	        var threshold = 1.;
 
@@ -192,7 +229,7 @@
 				.attr("r", 4);
 			
 			//-------------------------------
-        	var div_right = d3.select("body")
+        	var div_right = d3.select("#renderer")
     			.append("div")
     			.attr("class", "block2");
         	
