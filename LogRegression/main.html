@@ -3,9 +3,10 @@
   <head>
 	<title>LogRegression</title>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-    <script type="text/javascript" src="x3dom.js"></script>
+	<script type="text/javascript" src="three.js"></script>
+	<script type="text/javascript" src="OrbitControls.js"></script>
     <script type="text/javascript" src="plot3d.js"></script>
-	<script type="text/javascript" src="plot2dExt.js"></script>
+	<script type="text/javascript" src="plot2d.js"></script>
 	<script type="text/javascript" src="logRegr.js"></script>
     <link rel="stylesheet" type="text/css" href="http://www.x3dom.org/download/dev/x3dom.css"/>
 	<style>
@@ -36,22 +37,66 @@
 	<script>
 		var w = parseFloat(450), h = parseFloat(450), padding = parseFloat(30);
 		var div1 = d3.select("#divPlot1").attr("class", "block1");
-		var div2 = d3.select("#divPlot2").attr("class", "block1");
-		var nSamples = 20;
+		var div2 = document.getElementById("divPlot2");
+		div2.setAttribute("class", "block1");
+		var scaleZ, renderer, scene, camera, controls, scale, scaleReturn, scaleZReturn;
+		var spheres = new Array();
+		var surfaceBlue, surfaceRed;
+		var axisRange = [0, 20];
+		var numTicksZ = 8;
+		function surfaceFunctionBlue(u, v){
+			var x,y,z;  
+						// u  and v range from 0 to 1.
+			x = 20 * u;  // x and z range from -10 to 10
+			z = 20 * v;
+			y = scaleZ(lr.loglossPenalties([scaleReturn(x), scaleReturn(z)])[1]);
+			return new THREE.Vector3( x, y, z );
+		}
+		function surfaceFunctionRed(u, v){
+			var x,y,z;  
+						// u  and v range from 0 to 1.
+			x = 20 * u;  // x and z range from -10 to 10
+			z = 20 * v;
+			y = scaleZ(lr.loglossPenalties([scaleReturn(x), scaleReturn(z)])[0]);
+			return new THREE.Vector3( x, y, z );
+		}
+		function normRand() {
+			return ((Math.random() + Math.random() + Math.random() + Math.random() + Math.random() + Math.random()) - 3) / 3;
+		}
+		var ticksZ = new Array();
+		var tickLabelZ = new Array();
+		var ticksValZ;
+		var nSamples = 30;
 		var dataset = new Array(nSamples);
 		var labels = [nSamples];
 		for (var i = 0; i < nSamples; i++) {
 			dataset[i] = [];
-			dataset[i][0] = Math.random() * 2 - 1;
-			dataset[i][1] = Math.random() * 2 - 1;
+			dataset[i][0] = normRand() * 3;
+			dataset[i][1] = normRand() * 3;
 			labels[i] = Math.floor(Math.random() * 2);
-			dataset[i][0] += 2 * labels[i] - 1;
-			dataset[i][1] += 2 * labels[i] - 1;
+			dataset[i][0] += (2 * labels[i] - 1);
+			dataset[i][1] += (2 * labels[i] - 1);
 		}
 		var minValue = -4, maxValue = 4;
 		var coeff1 = 1, coeff2 = 2, bias = 3;
 		var lr = new logRegression(coeff1, coeff2, bias);
-		scatterPlot3d(div2);
+		function maxTickZ(){
+			var max;
+			if (labels[0]) max = lr.loglossPenalties(dataset[0])[0]
+			else max = lr.loglossPenalties(dataset[0])[1];
+			for (var i = 1; i < nSamples; i++){
+				if (labels[i] == 1 && lr.loglossPenalties(dataset[i])[0] > max) max = lr.loglossPenalties(dataset[i])[0];
+				if (labels[i] == 0 && lr.loglossPenalties(dataset[i])[1] > max) max = lr.loglossPenalties(dataset[i])[1];
+			}
+			return Math.max(max, 1);
+		}
+		scaleZReturn = d3.scale.linear()
+			.domain([0, 20])
+			.range([0, maxTickZ()]);
+		scaleZ = d3.scale.linear()
+			.domain([0, maxTickZ()])
+			.range([0, 20]);
+		scatterPlot3d(div2, w + padding, h + padding);
 		plot2d(div1);
 	</script>
   </body>
